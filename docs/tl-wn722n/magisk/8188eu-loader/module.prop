@@ -1,0 +1,6 @@
+id=8188eu-loader
+name=8188eu loader
+version=1.0
+versionCode=1
+author=local
+description=Loads the self-built 8188eu.ko (TL-WN722N v2/v3) at boot.

@@ -46,6 +46,18 @@ done
 
 echo "All submodules cloned successfully."
 
+# aircrack-ng rtl8188eus (TL-WN722N v2/v3, monitor mode + injection).
+# Replaces the staging r8188eu driver (both claim USB ID 2357:010c).
+# Pinned to a tested commit; LED support is compiled out upstream, so enable it.
+RTL8188EUS_URL="https://github.com/aircrack-ng/rtl8188eus.git"
+RTL8188EUS_REV="af3bf004458f76b7aec33e9ba552cd382ed1f5c3"
+RTL8188EUS_DIR="$KERNEL_DIR/drivers/staging/rtl8188eus"
+rm -rf "$RTL8188EUS_DIR"
+git clone -q -b v5.3.9 "$RTL8188EUS_URL" "$RTL8188EUS_DIR" && \
+	git -C "$RTL8188EUS_DIR" checkout -q "$RTL8188EUS_REV" || { echo "rtl8188eus clone failed! Aborting..."; exit 1; }
+sed -i 's|^/\* #define CONFIG_RTW_LED \*/|#define CONFIG_RTW_LED|' "$RTL8188EUS_DIR/include/autoconf.h"
+grep -q '^#define CONFIG_RTW_LED$' "$RTL8188EUS_DIR/include/autoconf.h" || { echo "Failed to enable rtl8188eus LED! Aborting..."; exit 1; }
+
 if ! [ -d "$TC_DIR" ]; then
 	echo "$TC_DIR not found! Setting it up..."
 	mkdir -p $TC_DIR
