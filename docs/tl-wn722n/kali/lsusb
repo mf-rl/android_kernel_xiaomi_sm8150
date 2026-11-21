@@ -1,0 +1,21 @@
+#!/bin/bash
+# lsusb replacement for NetHunter chroots on old kernels (libudev 262 can't
+# enumerate devices there). Reads sysfs directly; names come from hwdb.bin.
+# Anything with arguments (e.g. -v, -t) is passed to the real lsusb first.
+if [ $# -gt 0 ] && /usr/bin/lsusb "$@" 2>/dev/null; then exit 0; fi
+
+for p in /sys/bus/usb/devices/*; do
+    [ -f "$p/idVendor" ] || continue
+    bus=$(<"$p/busnum") dev=$(<"$p/devnum")
+    vid=$(<"$p/idVendor") pid=$(<"$p/idProduct")
+    v=""; m=""
+    while IFS='=' read -r k val; do
+        case $k in
+            ID_VENDOR_FROM_DATABASE) v=$val ;;
+            ID_MODEL_FROM_DATABASE)  m=$val ;;
+        esac
+    done < <(systemd-hwdb query "usb:v${vid^^}p${pid^^}" 2>/dev/null)
+    [ -n "$v" ] || v=$(cat "$p/manufacturer" 2>/dev/null)
+    [ -n "$m" ] || m=$(cat "$p/product" 2>/dev/null)
+    printf 'Bus %03d Device %03d: ID %s:%s %s\n' "$bus" "$dev" "$vid" "$pid" "$v${m:+ $m}"
+done | sort
