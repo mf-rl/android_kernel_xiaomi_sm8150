@@ -44,11 +44,8 @@ jobs:
       - name: Enable ThinLTO in defconfig
         working-directory: /k
         run: |
-          if [[ "$GITHUB_REF_NAME" == "nethunter" ]]; then
-            DEFCONFIG="nethunter_defconfig"
-          else
-            DEFCONFIG="vayu_user_defconfig"
-          fi
+          # build.sh always builds nethunter_defconfig
+          DEFCONFIG="nethunter_defconfig"
           sed -i 's/# CONFIG_THINLTO is not set/CONFIG_THINLTO=y/' "arch/arm64/configs/$DEFCONFIG"
 
       - name: Build kernel
