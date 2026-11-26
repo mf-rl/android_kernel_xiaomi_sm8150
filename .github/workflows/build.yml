@@ -81,7 +81,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           git tag "${{ github.event.inputs.release_tag }}"
-          git push origin "${{ github.event.inputs.release_tag }}"
+          git push origin "refs/tags/${{ github.event.inputs.release_tag }}:refs/tags/${{ github.event.inputs.release_tag }}"
 
       - name: Create release & upload artifacts
         uses: softprops/action-gh-release@v2
